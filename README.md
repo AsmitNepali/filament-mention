@@ -90,14 +90,14 @@ return [
  - ``default.menu_item_limit``: Maximum number of suggestions to display.
 
 ### Recommendations:
-- **Use cache to store the mentionable data for static search.**
-- **Add indexes to the columns used for dynamic search.**
-- **If you are use mention editor inside the modal, please disable grammarly extension by ``disableGrammarly()``.**
+- **Use a cache to store the mentionable data for static search.**
+- **Add indexes to the columns used for the dynamic search.**
+- **If you are using mention editor inside the modal, please disable grammarly extension by calling ``disableGrammarly()``.**
 
 ---
 ## Usage
 ### 1. Static Search
-Static search preloads all mentionable data and searches within that dataset. For static search you can you ``RichMentionEditor`` field.
+Static search preloads all mentionable data and searches within that dataset. For static search you can use ``RichMentionEditor`` field.
 
 The ``RichMentionEditor`` fetch all the mentionable data first and then search the mention item from the fetched data.
 
@@ -107,7 +107,7 @@ use Asmit\Mention\Forms\Components\RichMentionEditor;
 RichMentionEditor::make('bio')
     ->columnSpanFull(),
 ```
-You can also change the data by pass the closure function ``mentionsItems`` in the ``RichMentionEditor`` field.
+You can also customize the data by passing a closure function to the ``mentionsItems`` method in the ``RichMentionEditor`` field.
 
 example:
 ```php
@@ -154,9 +154,9 @@ For dynamic search you can you ``FetchMentionEditor`` field.
 
 > NOTE: The ``search_key`` must be the column name of your table.
 
-Before use the ``FetchMentionEditor`` field you need to implement the ``Mentionable`` interface in your livewire page (e.g. create and edit page).\
-And then ```use Asmit\FilamentMention\Traits\Mentionable;``` in your livewire page.\
-It will add the method ``getMentionableItems(string $searhKey)`` in your livewire page. You can use this method to fetch the mentionable data.
+Before using the ``FetchMentionEditor`` field you need to implement the ``Mentionable`` interface in your livewire page (e.g. create and edit page).\
+And then ```use Asmit\FilamentMention\Traits\Mentionable;``` in your Livewire page.\
+It will add the method ``getMentionableItems(string $searchKey)`` in your livewire page. You can use this method to fetch the mentionable data.
 
 ```php
 use Asmit\FilamentMention\Forms\Components\FetchMentionEditor;
@@ -179,7 +179,7 @@ FetchMentionEditor::make('note')
 ```
 The ``pluck`` method accepts the ``key`` name to extract the field from the mentioned user.
 
-It will add the new data attribute named ``mentions_[YOUR FIELD NAME]``. You can use this attribute to get the extracted field from the mentioned user.
+It will add a new data attribute named ``mentions_[YOUR FIELD NAME]``. You can use this attribute to get the extracted field from the mentioned user.
 
 ---
 
@@ -190,7 +190,7 @@ It will add the new data attribute named ``mentions_[YOUR FIELD NAME]``. You can
 
 ### Security
 
-If you discover a security vulnerability within this package, please send an e-mail to asmitnepali99@gmail.com, All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within this package, please send an e-mail to asmitnepali99@gmail.com; All security vulnerabilities will be promptly addressed.
 
 ### 🤝 Contributing
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
