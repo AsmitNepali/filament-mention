@@ -84,8 +84,8 @@ export function mention({
                 lookupKey,
                 menuItemLimit,
                 valuesFunction: (text, cb) => {
-                    const items = mentionableItems.filter(user =>
-                        user[lookupKey].includes(text)
+                  const items = mentionableItems.filter(user =>
+                        user[lookupKey].toLowerCase().includes(text.toLowerCase())
                     );
                     cb(items);
                 }

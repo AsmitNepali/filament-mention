@@ -45,30 +45,77 @@ class RichMentionEditor extends RichEditor
 
     public function dehydrateState(array &$state, bool $isDehydrated = true): void
     {
-        $rawState = $state['data'][$this->getName()];
+        $key = array_key_first($state);
 
+        if ($key === 'data') {
+            $this->dehydrateData($state);
+
+            return;
+        }
+
+        $this->dehydrateMountedActionsData($state, $key);
+    }
+
+    /**
+     * @param array<string, mixed> $state
+     * @return void
+     */
+    public function dehydrateData(array &$state): void
+    {
+        $fieldName = $this->getName();
+        $rawState = $state['data'][$fieldName];
+
+        if (! blank($this->getPluck())) {
+            $mentions = $this->extractMentions($rawState);
+            $this->updateStateWithMentions($state, $mentions);
+        }
+
+        $cleanedText = $this->removeAppendedExtraTextFromState($rawState);
+        $this->updateState($state, $cleanedText);
+    }
+
+    /**
+     * @param array<string, mixed> $state
+     * @param array<int|string, int|string> $mentions
+     */
+    private function updateStateWithMentions(array &$state, array $mentions): void
+    {
+        $mentionKey = 'mentions_'.$this->getName();
+        $this->getLivewire()->data[$mentionKey] = $mentions; // @phpstan-ignore-line
+        $state['data'][$mentionKey] = $mentions;
+    }
+
+    /**
+     * @param array<string, mixed> $state
+     * @return void
+     */
+    private function updateState(array &$state, string|null $cleanedText): void
+    {
+
+        $fieldName = $this->getName();
+        $this->getLivewire()->data[$fieldName] = $cleanedText; // @phpstan-ignore-line
+        $state['data'][$fieldName] = $cleanedText;
+    }
+
+    /**
+     * @param array<string, mixed> $state
+     */
+    public function dehydrateMountedActionsData(array &$state, string|null $keyOfMountActionData): void
+    {
+        if (is_null($keyOfMountActionData)) {
+            return;
+        }
+        $rawState = $state[$keyOfMountActionData][0][$this->getName()];
         // Process mentions if pluck is provided
         if (! blank($this->getPluck())) {
-
             $mentions = $this->extractMentions($rawState);
-
-            $this->updateLivewireData('mentions_'.$this->getName(), $mentions);
-
-            $state['data']['mentions_'.$this->getName()] = $mentions;
+            $state[$keyOfMountActionData][0]['mentions_'.$this->getName()] = $mentions;
         }
 
         // Remove IDs from the text and update the state
         $cleanedText = $this->removeAppendedExtraTextFromState($rawState);
-        $this->updateLivewireData($this->getName(), $cleanedText);
-        $state['data'][$this->getName()] = $cleanedText;
-    }
+        $state[$keyOfMountActionData][0][$this->getName()] = $cleanedText;
 
-    /**
-     * Update Livewire data with the given key and value.
-     */
-    protected function updateLivewireData(string $key, mixed $value): void
-    {
-        $this->getLivewire()->data[$key] = $value; // @phpstan-ignore-line
     }
 
     private function removeAppendedExtraTextFromState(?string $text): ?string
