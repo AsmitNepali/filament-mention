@@ -32,6 +32,8 @@ class RichMentionEditor extends RichEditor
 
     protected ?int $menuItemLimit = null;
 
+    protected string $stateKey = 'data';
+
     /**
      * @param  array<string, mixed>|\Closure  $mentionsItems
      * @return $this
@@ -43,11 +45,18 @@ class RichMentionEditor extends RichEditor
         return $this;
     }
 
+    public function stateKey(string $stateKey): static
+    {
+        $this->stateKey = $stateKey;
+
+        return $this;
+    }
+
     public function dehydrateState(array &$state, bool $isDehydrated = true): void
     {
         $key = array_key_first($state);
 
-        if ($key === 'data') {
+        if ($key === $this->stateKey) {
             $this->dehydrateData($state);
 
             return;
@@ -63,7 +72,7 @@ class RichMentionEditor extends RichEditor
     public function dehydrateData(array &$state): void
     {
         $fieldName = $this->getName();
-        $rawState = $state['data'][$fieldName];
+        $rawState = $state[$this->stateKey][$fieldName];
 
         if (! blank($this->getPluck())) {
             $mentions = $this->extractMentions($rawState);
@@ -81,8 +90,8 @@ class RichMentionEditor extends RichEditor
     private function updateStateWithMentions(array &$state, array $mentions): void
     {
         $mentionKey = 'mentions_'.$this->getName();
-        $this->getLivewire()->data[$mentionKey] = $mentions; // @phpstan-ignore-line
-        $state['data'][$mentionKey] = $mentions;
+        $this->getLivewire()->{$this->stateKey}[$mentionKey] = $mentions; // @phpstan-ignore-line
+        $state[$this->stateKey][$mentionKey] = $mentions;
     }
 
     /**
@@ -93,8 +102,8 @@ class RichMentionEditor extends RichEditor
     {
 
         $fieldName = $this->getName();
-        $this->getLivewire()->data[$fieldName] = $cleanedText; // @phpstan-ignore-line
-        $state['data'][$fieldName] = $cleanedText;
+        $this->getLivewire()->{$this->stateKey}[$fieldName] = $cleanedText; // @phpstan-ignore-line
+        $state[$this->stateKey][$fieldName] = $cleanedText;
     }
 
     /**
