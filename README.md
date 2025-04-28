@@ -28,7 +28,10 @@ The **Mention** plugin allows you to easily mention users in your Filament appli
 - **Static search**: Preload and search from a dataset.
 - **Dynamic search**: Fetch data from the database in real-time.
 - **Customizable user model and fields**: Use your own `User` model and define which fields to display.
-- **Customizable mention trigger character**: Change the default `@` trigger to any character.
+- **Multiple trigger characters**: Use different characters like `@`, `#`, `%` to trigger different types of mentions.
+- **Global object search**: Search across all properties of an object without requiring a specific lookup key.
+- **Prefix and suffix support**: Add custom text before and after mentions (e.g., `%VARIABLE%`).
+- **Customizable title and hint fields**: Configure which fields to use for display in the dropdown menu.
 - **Customizable suggestion limits**: Control the number of suggestions displayed and the minimum text length to trigger the search.
 - **Avatar and URL support**: Display user avatars and link to their profiles.
 
@@ -54,7 +57,7 @@ This will create a `filament-mention.php` file in your `config` directory. You c
 ---
 
 ## Configuration
-The configuration file (``config/filament-mention.php``) allows you to customize the plugin behavior. Here’s an example configuration:
+The configuration file (``config/filament-mention.php``) allows you to customize the plugin behavior. Here's an example configuration:
 
 ```php
 return [
@@ -71,23 +74,52 @@ return [
         'search_key' => 'username', // Used for dynamic search (database column)
     ],
     'default' => [
-        'trigger_with' => '@', // Character to trigger mentions (e.g. @)
-        'menu_show_min_length' => 2, // Minimum characters to type before showing suggestions
+        'trigger_with' => ['@', '#', '%'], // Characters to trigger mentions
+        'trigger_configs' => [
+            '@' => [
+                'prefix' => '',
+                'suffix' => '',
+                'title_field' => 'name',
+                'hint_field' => null,
+            ],
+            '#' => [
+                'prefix' => '',
+                'suffix' => '',
+                'title_field' => 'name',
+                'hint_field' => null,
+            ],
+            '%' => [
+                'prefix' => '%',
+                'suffix' => '%',
+                'title_field' => 'title',
+                'hint_field' => null,
+            ],
+        ],
+        'menu_show_min_length' => 0, // Minimum characters to type before showing suggestions
         'menu_item_limit' => 10, // Maximum number of suggestions to display
+        'prefix' => '', // Default prefix for all mentions
+        'suffix' => '', // Default suffix for all mentions
+        'title_field' => 'title', // Default field to use for title display
+        'hint_field' => null, // Default field to use for hint display
     ],
 ];
 ```
 ---
 
 ### Key Configuration Options:
- - ``mentionable.model``: The Eloquent model to use for mentions (e.g. User).
- - ``mentionable.column``: Map the fields to use for mentions (e.g. id, name, etc.).
- - ``mentionable.url``: URL pattern for the mention item (e.g. admin/users/{id}).
- - ``mentionable.lookup_key``: Used for static search (key in the dataset).
- - ``mentionable.search_key``: Used for dynamic search (database column).
- - ``default.trigger_with``: Character to trigger mentions (e.g. @).
- - ``default.menu_show_min_length``: Minimum characters to type before showing suggestions.
- - ``default.menu_item_limit``: Maximum number of suggestions to display.
+- ``mentionable.model``: The Eloquent model to use for mentions (e.g. User).
+- ``mentionable.column``: Map the fields to use for mentions (e.g. id, name, etc.).
+- ``mentionable.url``: URL pattern for the mention item (e.g. admin/users/{id}).
+- ``mentionable.lookup_key``: Used for static search (key in the dataset).
+- ``mentionable.search_key``: Used for dynamic search (database column).
+- ``default.trigger_with``: Character(s) to trigger mentions (e.g. @, #, %). Can be a string or an array.
+- ``default.trigger_configs``: Configuration for specific trigger characters.
+- ``default.menu_show_min_length``: Minimum characters to type before showing suggestions.
+- ``default.menu_item_limit``: Maximum number of suggestions to display.
+- ``default.prefix``: Default prefix to add before mentions.
+- ``default.suffix``: Default suffix to add after mentions.
+- ``default.title_field``: Default field to use for title display in dropdown.
+- ``default.hint_field``: Default field to use for hint display in dropdown.
 
 ### Recommendations:
 - **Use cache to store the mentionable data for static search.**
@@ -125,9 +157,9 @@ RichMentionEditor::make('bio')
 ```
 
 #### Key Points
- - The ``mentionItems`` method should return an array of mentionable items.
- - Map the data to include ``id``, ``username``, ``name``, ``avatar``, and ``url``.
- - Use the ``lookup_key`` to search the mentionable item.
+- The ``mentionItems`` method should return an array of mentionable items.
+- Map the data to include ``id``, ``username``, ``name``, ``avatar``, and ``url``.
+- Use the ``lookup_key`` to search the mentionable item.
 
 You can change the ``lookup_key`` with chaining the method ``lookupKey`` in the ``RichMentionEditor`` field.
 ```php
@@ -148,7 +180,7 @@ RichMentionEditor::make('bio')
 > NOTE: The data should be mapped like the above example.
 
 ### 2. Dynamic Search
-Dynamic search fetches mentionable data from the database in real-time. Use the ``FetchMentionEditor`` field for this purpose. 
+Dynamic search fetches mentionable data from the database in real-time. Use the ``FetchMentionEditor`` field for this purpose.
 
 For dynamic search you can you ``FetchMentionEditor`` field.
 
@@ -180,6 +212,132 @@ FetchMentionEditor::make('note')
 The ``pluck`` method accepts the ``key`` name to extract the field from the mentioned user.
 
 It will add the new data attribute named ``mentions_[YOUR FIELD NAME]``. You can use this attribute to get the extracted field from the mentioned user.
+
+---
+
+## Advanced Features
+
+### Multiple Trigger Characters
+You can use different characters to trigger different types of mentions. This is useful when you want to mention different types of entities (e.g., users, tags, variables).
+
+```php
+RichMentionEditor::make('content')
+    ->triggerWith(['@', '#', '%'])
+```
+
+You can also configure each trigger character separately:
+
+```php
+RichMentionEditor::make('content')
+    ->triggerWith(['@', '#', '%'])
+    ->triggerConfigs([
+        '@' => [
+            'lookupKey' => 'username',
+            'prefix' => '',
+            'suffix' => '',
+            'title_field' => 'name',
+            'hint_field' => 'email',
+        ],
+        '#' => [
+            'lookupKey' => 'tag',
+            'prefix' => '#',
+            'suffix' => '',
+            'title_field' => 'name',
+            'hint_field' => null,
+        ],
+        '%' => [
+            'lookupKey' => 'name',
+            'prefix' => '%',
+            'suffix' => '%',
+            'title_field' => 'title',
+            'hint_field' => null,
+        ],
+    ])
+```
+
+### Global Object Search
+The plugin now supports searching across all properties of an object without requiring a specific lookup key. This makes it easier to find matches regardless of which field contains the search text.
+
+```php
+RichMentionEditor::make('content')
+    ->menuShowMinLength(0) // Show all items immediately
+```
+
+### Prefix and Suffix
+You can add custom text before and after mentions. This is particularly useful for variables or special formatting.
+
+```php
+RichMentionEditor::make('content')
+    ->prefix('%')
+    ->suffix('%')
+```
+
+You can also configure prefix and suffix for specific trigger characters:
+
+```php
+RichMentionEditor::make('content')
+    ->triggerWith(['@', '%'])
+    ->triggerConfigs([
+        '@' => [
+            'prefix' => '',
+            'suffix' => '',
+        ],
+        '%' => [
+            'prefix' => '%',
+            'suffix' => '%',
+        ],
+    ])
+```
+
+### Customizable Title and Hint Fields
+You can configure which fields to use for the title and hint in the dropdown menu:
+
+```php
+RichMentionEditor::make('content')
+    ->titleField('name')
+    ->hintField('email')
+```
+
+Or for specific trigger characters:
+
+```php
+RichMentionEditor::make('content')
+    ->triggerWith(['@', '%'])
+    ->triggerConfigs([
+        '@' => [
+            'title_field' => 'name',
+            'hint_field' => 'email',
+        ],
+        '%' => [
+            'title_field' => 'title',
+            'hint_field' => null,
+        ],
+    ])
+```
+
+### Example: Variables with Prefix and Suffix
+Here's an example of using the plugin to insert variables with % prefix and suffix:
+
+```php
+RichMentionEditor::make('content')
+    ->triggerWith('%')
+    ->prefix('%')
+    ->suffix('%')
+    ->menuShowMinLength(0)
+    ->mentionsItems([
+        [
+            'id' => 1,
+            'title' => 'SALUTATION',
+            'value' => 'salutation',
+        ],
+        [
+            'id' => 2,
+            'title' => 'FIRST_NAME',
+            'value' => 'firstName',
+        ],
+        // More variables...
+    ])
+```
 
 ---
 

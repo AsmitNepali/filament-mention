@@ -1,29 +1,31 @@
 {
-    "name": "asmit/filament-mention",
-    "description": "Mention editor",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Asmit\\FilamentMention\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "AsmitNepali",
-            "homepage": "https://github.com/asmitnepali",
-            "role": "Software Engineer"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "filament/support": "^3.0"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Asmit\\FilamentMention\\FilamentMentionServiceProvider"
-            ]
-        }
+  "name": "asmit/filament-mention",
+  "description": "A Laravel Filament package for implementing a customizable mention editor with support for tagging users or entities.",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Asmit\\FilamentMention\\": "src/"
     }
+  },
+  "authors": [
+    {
+      "name": "AsmitNepali",
+      "homepage": "https://github.com/asmitnepali",
+      "role": "Software Engineer"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "filament/support": "^3.0",
+    "filament/forms": "^3.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Asmit\\FilamentMention\\FilamentMentionServiceProvider"
+      ]
+    }
+  }
 }
