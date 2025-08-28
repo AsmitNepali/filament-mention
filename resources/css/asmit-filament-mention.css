@@ -99,6 +99,10 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
+.dark .mention-item__info-name {
+    color: rgb(255, 255, 255);
+}
+
 .dark .mention-item__avatar {
     background-color: #f2f2f2;
 }
